@@ -17,8 +17,8 @@ android {
         targetSdk 35
         // CI passes -PversionCode=<run number> so every build is installable
         // over the last one. Falls back to 1 for local builds.
-        versionCode ((project.findProperty("versionCode") ?: "1") as String) as Integer
-        versionName (project.findProperty("versionName") ?: "1.0") as String
+versionCode 1
+versionName "1.0"
     }
 
     signingConfigs {
