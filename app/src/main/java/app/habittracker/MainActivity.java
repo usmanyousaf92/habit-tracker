@@ -24,22 +24,6 @@ import androidx.webkit.WebViewClientCompat;
 
 /**
  * Habit Tracker — a single-Activity WebView host for the bundled SPA.
- *
- * Three things here matter:
- *
- *  1. The page is served through WebViewAssetLoader over a real https:// origin
- *     (appassets.androidplatform.net) rather than file://. A file:// page has a
- *     null origin, which makes localStorage unreliable across WebView versions —
- *     and localStorage is where habits and the theme choice live.
- *
- *  2. The window is edge-to-edge and the ROOT VIEW's background paints the
- *     status/navigation bar areas. Window.setStatusBarColor() is a no-op for
- *     apps targeting API 35, so colouring the root is the version-proof way to
- *     keep the bars matching the app's current theme.
- *
- *  3. A tiny shim wraps the page's own setTheme() so that toggling the theme in
- *     the web UI also repaints the native bars. The HTML is never modified; the
- *     shim is injected after each page load.
  */
 public class MainActivity extends android.app.Activity {
 
@@ -71,16 +55,15 @@ public class MainActivity extends android.app.Activity {
             + "})();";
 
     /**
-     * The web app always boots to its Welcome screen. That is right the first
-     * time and irritating every morning after, so once Welcome has been seen we
-     * jump straight to Home. Done here rather than by editing the HTML, which
-     * stays byte-for-byte the file you can also open in a desktop browser.
+     * Skips Welcome only if the user is currently on the welcome screen.
      */
     private static final String BOOT_SCRIPT =
             "(function(){"
             + "  try {"
             + "    if (localStorage.getItem('habitTrackerSeenWelcome') === '1') {"
-            + "      if (typeof show === 'function') { show('home', false); }"
+            + "      if (typeof show === 'function' && (typeof current === 'undefined' || current === 'welcome')) {"
+            + "        show('home', false);"
+            + "      }"
             + "    } else {"
             + "      localStorage.setItem('habitTrackerSeenWelcome', '1');"
             + "    }"
@@ -109,6 +92,7 @@ public class MainActivity extends android.app.Activity {
     private FrameLayout root;
     private WebView web;
     private boolean darkTheme = false;
+    private boolean initialLoadDone = false;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -143,9 +127,6 @@ public class MainActivity extends android.app.Activity {
         s.setAllowFileAccess(false);           // nothing is loaded over file://
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        // The layout is a fixed 390x844 design, so honour its own type scale
-        // rather than the system font-size setting. Delete this line if you
-        // would rather the OS accessibility text size apply.
         s.setTextZoom(100);
 
         final WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
@@ -158,8 +139,6 @@ public class MainActivity extends android.app.Activity {
             @Override
             public WebResourceResponse shouldInterceptRequest(
                     @NonNull WebView view, @NonNull WebResourceRequest request) {
-                // Returns null for anything outside /assets/ (e.g. Google Fonts),
-                // which lets those load over the network normally.
                 return loader.shouldInterceptRequest(request.getUrl());
             }
 
@@ -173,14 +152,16 @@ public class MainActivity extends android.app.Activity {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, url));
                 } catch (Exception ignored) {
-                    // No browser available; just swallow it.
                 }
                 return true;
             }
 
             @Override
             public void onPageFinished(@NonNull WebView view, @NonNull String url) {
-                view.evaluateJavascript(BOOT_SCRIPT, null);
+                if (!initialLoadDone) {
+                    initialLoadDone = true;
+                    view.evaluateJavascript(BOOT_SCRIPT, null);
+                }
                 view.evaluateJavascript(THEME_SHIM, null);
             }
         });
@@ -296,7 +277,6 @@ public class MainActivity extends android.app.Activity {
         super.onResume();
         if (web != null) {
             web.onResume();
-            // Another surface may have changed the stored theme; re-sync.
             web.evaluateJavascript(THEME_SHIM, null);
         }
     }
