@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Habit Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* ============================================================
+   Habit Tracker — single-file SPA
+   Design tokens. Light is :root, dark overrides on [data-theme].
+   Every value here is carried over from the canvas source.
+   ============================================================ */
+:root{
+  --bg:#FBF7EF; --card:#EEF2E9; --surface:#FFFFFF;
+  --text:#34302A; --text-muted:#5C5748; --caption:#8C8677; --border:#E0E7D8;
+
+  --nav-icon:#3F5237; --chip-bg:#EEF2E9; --accent-on:#3F5237;
+  --icon-on:#3F5237; --icon-chip:#EEF2E9;
+  --nav-active-bg:rgba(133,196,65,0.10); --nav-active-fg:#317C22; --nav-inactive:#8C8677;
+
+  --hero-gradient:linear-gradient(155deg,#16301F 0%,#1F4A2E 55%,#2F6B3E 100%);
+  --hero-veil:0; --hero-name:#FFFFFF; --hero-sub:rgba(255,255,255,0.78);
+  --sprout-watermark:0.18;
+
+  --panel-bg:#FFFFFF; --panel-edge:transparent; --panel-elevation:none;
+  --panel-text:#1F3D2A; --panel-muted:#5C7A63; --panel-caption:#7C8F80; --panel-border:#E1E9DC;
+  --trophy-bg:rgba(255,255,255,0.20); --trophy-border:rgba(255,255,255,0.28);
+
+  --row-surface:#FFFFFF; --row-edge:transparent;
+  --ring-on:#3F5237; --ring-rest:#E0E7D8; --ring-track:#E9EDDF;
+  --bar-sage:#8CA37D; --empty-bar:#E6E2D6;
+
+  --seg-active-bg:#FFFFFF; --seg-active-fg:#3F5237; --seg-active-ring:transparent;
+  --sheet-surface:linear-gradient(#FBF7EF,#FBF7EF) padding-box,linear-gradient(#E0E7D8,#E0E7D8) border-box;
+  --sheet-close:#8C8677; --sheet-muted:#6B6558;
+
+  --danger-fg:#B3261E; --danger-bg:#F7E2E0; --danger-faint:#8F5F5A;
+  --warn-bg:#FBEBD3; --warn-fg:#9A5B14;
+  --sprout-icon:#348324; --streak-on:#3F5237;
+
+  --hue-med:#5B4B8A; --hue-med-bg:#E5DFEE;
+  --hue-water:#2F6F72; --hue-water-bg:#DCE7EC;
+  --hue-read:#8A5A24; --hue-read-bg:#F6E3D2;
+  --hue-walk:#9C4A63; --hue-walk-bg:#F3DCE1;
+
+  --cta-gradient:linear-gradient(to right,#E6E533 0%,#85C441 58%,#348324 100%);
+  --cta-glow:rgba(133,196,65,0.25);
+  --on-bright:#112219;
+}
+[data-theme="dark"]{
+  --bg:#1E2019; --card:#2A2E22; --surface:#262A20;
+  --text:#F2EFE6; --text-muted:#B7B2A2; --caption:#9A9686; --border:#3A3F30;
+
+  --nav-icon:#F2EFE6; --chip-bg:rgba(255,255,255,0.10); --accent-on:#A8C79A;
+  --icon-on:#A8C79A; --icon-chip:rgba(255,255,255,0.12);
+  --nav-active-bg:rgba(133,196,65,0.10); --nav-active-fg:#C2D871; --nav-inactive:#8A9C8F;
+
+  --hero-gradient:linear-gradient(155deg,#101A14 0%,#16221A 55%,#1E2E22 100%);
+  --hero-veil:0.45; --hero-name:#C2D871; --hero-sub:#8AA392;
+  --sprout-watermark:0.08;
+
+  --panel-bg:#334538; --panel-edge:rgba(194,216,113,0.35);
+  --panel-elevation:0 10px 30px rgba(133,196,65,0.10),0 3px 12px rgba(0,0,0,0.35);
+  --panel-text:#F2EFE6; --panel-muted:#B7B2A2; --panel-caption:#A8B5AB;
+  --panel-border:rgba(255,255,255,0.08);
+  --trophy-bg:rgba(255,255,255,0.10); --trophy-border:rgba(255,255,255,0.16);
+
+  --row-surface:#253328; --row-edge:rgba(255,255,255,0.05);
+  --ring-on:#C2D871; --ring-rest:rgba(255,255,255,0.08); --ring-track:rgba(255,255,255,0.08);
+  --bar-sage:linear-gradient(to top,#348324 0%,#E6E533 100%); --empty-bar:#4A5F51;
+
+  --seg-active-bg:#2C4A3E; --seg-active-fg:#F2EFE6; --seg-active-ring:rgba(255,255,255,0.14);
+  --sheet-surface:linear-gradient(#253328,#253328) padding-box,linear-gradient(135deg,rgba(194,216,113,0.50) 0%,rgba(52,131,36,0.20) 100%) border-box;
+  --sheet-close:#D1D5DB; --sheet-muted:#A8B5AB;
+
+  --danger-fg:#E2867E; --danger-bg:#3A2523; --danger-faint:#B98B85;
+  --warn-bg:#3A2E1C; --warn-fg:#E0A462;
+  --sprout-icon:#A8C79A; --streak-on:#E6E533;
+
+  --hue-med:#BB86F0; --hue-med-bg:#464554;
+  --hue-water:#3FC4B8; --hue-water-bg:#2B5348;
+  --hue-read:#E8A836; --hue-read-bg:#504D2B;
+  --hue-walk:#F57892; --hue-walk-bg:#53423F;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:hidden}
+body{background:#0e0f0c;font-family:'Nunito',sans-serif;display:flex;justify-content:center;
+     align-items:center;min-height:100vh;padding:16px}
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none}
+button,a{font:inherit;border:none;background:none;padding:0;cursor:pointer;text-decoration:none;color:inherit}
+input{font:inherit}
+
+/* ---- the phone frame ---- */
+.phone{position:relative;width:390px;height:844px;border-radius:28px;overflow:hidden;
+       background:var(--bg);color:var(--text);display:flex;flex-direction:column;
+       box-shadow:0 30px 80px rgba(0,0,0,.5);transition:background-color .3s ease,color .3s ease}
+@media (max-width:430px){
+  body{padding:0}
+  .phone{width:100vw;height:100dvh;border-radius:0}
+}
+
+/* ---- view router: display toggling, one section visible ---- */
+.view{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;background:var(--bg)}
+.view.is-active{display:flex}
+.view.has-tabs{bottom:0}
+.scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.shrink0{flex-shrink:0}
+
+/* ---- motion ---- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes scrimIn{from{opacity:0}to{opacity:1}}
+@keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes floatSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes checkPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.fade-up{animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both}
+.pop-in{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+.scrim-in{animation:scrimIn .25s ease both}
+.sheet-in{animation:sheetIn .3s cubic-bezier(.22,1.1,.36,1) both}
+.sprout{animation:sway 3.4s ease-in-out infinite;transform-origin:bottom center}
+.press{transition:transform .15s cubic-bezier(.34,1.56,.64,1),background-color .2s ease}
+.press:active{transform:scale(.94)}
+.cta{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease}
+.cta:active{transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+                       transition-duration:.01ms!important}
+}
+
+/* ---- shared components ---- */
+.h1{font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;line-height:1.1;color:var(--text)}
+.sub{font-family:'Nunito',sans-serif;font-size:12px;color:var(--caption);font-style:italic;margin-top:2px}
+.chip-btn{width:40px;height:40px;border-radius:50%;background:var(--chip-bg);display:flex;
+          align-items:center;justify-content:center;color:var(--nav-icon);flex-shrink:0}
+.page-head{display:flex;align-items:center;gap:14px;padding:28px 24px 0 24px;flex-shrink:0}
+.field{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:18px;
+       padding:15px 16px;font-size:15px;color:var(--text);transition:border-color .2s ease}
+.field:focus{outline:none;border-color:var(--accent-on)}
+.label{font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:var(--text-muted);margin-bottom:8px}
+.cta-primary{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--cta-gradient);
+             color:var(--on-bright);border-radius:999px;box-shadow:0 10px 24px var(--cta-glow);
+             font-family:'Nunito',sans-serif;font-weight:800;font-size:15px}
+.footer-bar{background:var(--surface);border-top:1px solid var(--card);padding:16px 24px 22px 24px;
+            display:flex;gap:10px;flex-shrink:0}
+.btn-ghost{flex:1;display:flex;align-items:center;justify-content:center;background:var(--card);
+           color:var(--text-muted);border-radius:999px;padding:15px;font-weight:700;font-size:15px}
+.setting-row{width:100%;display:flex;align-items:center;gap:14px;padding:16px 0;text-align:left;
+             border-bottom:1px solid var(--card);border-radius:14px;transition:transform .15s ease}
+.setting-row:last-child{border-bottom:none}
+.setting-row:active{transform:scale(.99)}
+.icon-well{width:40px;height:40px;border-radius:50%;background:var(--icon-chip);display:flex;
+           align-items:center;justify-content:center;color:var(--icon-on);flex-shrink:0}
+.card-group{background:var(--surface);border-radius:22px;padding:2px 18px;margin:0 24px;
+            box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+.sec-head{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--text);
+          padding:26px 24px 12px 24px}
+
+/* ---- bottom tab bar (one component, shared by every tabbed view) ---- */
+.tabbar{position:absolute;left:0;right:0;bottom:0;z-index:40;background:var(--surface);
+        border-top:1px solid var(--card);border-radius:24px 24px 0 0;padding:12px 8px 20px 8px;
+        display:flex;align-items:center;transition:background-color .3s ease}
+.tabbar[hidden]{display:none}
+.tab{flex:1 1 0;display:flex;justify-content:center;padding:2px;background:transparent;
+     transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.tab:active{transform:scale(.9)}
+.tab-inner{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 18px;
+           border-radius:16px;background:transparent;transition:background-color .25s ease}
+.tab[aria-current="page"] .tab-inner{background:var(--nav-active-bg)}
+.tab svg{stroke:var(--nav-inactive);fill:none}
+.tab span{font-family:'Nunito',sans-serif;font-weight:700;font-size:11px;color:var(--nav-inactive)}
+.tab[aria-current="page"] svg{stroke:var(--nav-active-fg)}
+.tab[aria-current="page"] span{color:var(--nav-active-fg)}
+.tab[aria-current="page"] .fill-when-active{fill:var(--nav-active-fg)}
+
+/* ---- overlays ---- */
+.overlay{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center}
+.overlay[hidden]{display:none}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.5);width:100%;display:block}
+.scrim.blur{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.dialog{position:relative;width:320px;background:var(--surface);border-radius:24px;padding:24px;
+        box-shadow:0 24px 50px rgba(0,0,0,.3);text-align:center}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:24px 24px 0 0;
+       padding:10px 16px 24px 16px;box-shadow:0 -18px 40px rgba(0,0,0,.25)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+
+<!-- ══════════════ WELCOME ══════════════ -->
+<section class="view" id="v-welcome" style="background:#112219">
+  <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,34,25,.80) 0%,rgba(44,74,62,.56) 38%,rgba(106,126,98,.56) 84%,rgba(32,46,32,.78) 100%)"></div>
+  <div style="position:relative;flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end;padding:0 28px 48px 28px;gap:10px">
+    <div class="sprout" style="width:54px;height:54px;margin-bottom:8px">
+      <svg viewBox="0 0 24 24" width="54" height="54" fill="none" stroke="#C2D871" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 14c-3.4-1-5.3 1.1-5.3 4.3 3.6.4 5.3-1.2 5.3-4.3Z"/><path d="M12 14c3.4-1 5.3 1.1 5.3 4.3-3.6.4-5.3-1.2-5.3-4.3Z"/><path d="M12 19V9.5"/>
+      </svg>
+    </div>
+    <h1 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:34px;color:#fff;margin:0;line-height:1.12">Small steps,<br>every day.</h1>
+    <p style="font-family:'Nunito',sans-serif;font-size:15px;color:rgba(255,255,255,.82);margin:6px 0 22px;line-height:1.5;max-width:270px">Build habits that stick — one gentle day at a time.</p>
+    <button class="cta cta-primary" data-go="home" style="padding:16px">Get started</button>
+    <button class="press" data-go="home" style="display:flex;align-items:center;justify-content:center;padding:16px;border-radius:999px;background:linear-gradient(to right,rgba(230,229,51,.5),rgba(52,131,36,.5));backdrop-filter:blur(14px);color:#fff;font-weight:800;font-size:15px">Create account</button>
+    <p style="font-family:'Nunito',sans-serif;font-size:11.5px;color:rgba(255,255,255,.62);text-align:center;margin:14px 0 0">By continuing you agree to our Terms and Privacy Policy.</p>
+  </div>
+</section>
+
+<!-- ══════════════ HOME ══════════════ -->
+<section class="view has-tabs" id="v-home">
+  <div class="scroll" style="padding-bottom:104px">
+
+    <!-- banner -->
+    <div class="fade-up shrink0" style="margin:22px 20px 0;padding:26px 20px 30px;border-radius:32px;position:relative;overflow:hidden;background:var(--hero-gradient)">
+      <svg width="100%" height="100%" viewBox="0 0 350 190" preserveAspectRatio="none" style="position:absolute;inset:0;pointer-events:none">
+        <circle cx="280" cy="18" r="90" fill="#fff" opacity=".05"/><circle cx="40" cy="10" r="60" fill="#fff" opacity=".04"/>
+        <path d="M0 138c40-16 80-16 122 0s82 16 124 0 70-14 104 0v52H0Z" fill="#fff" opacity=".05"/>
+        <path d="M0 150c50-12 90-12 142 0s92 12 208 0v40H0Z" fill="#fff" opacity=".07"/>
+      </svg>
+      <div aria-hidden="true" style="position:absolute;inset:0;background:#0C130E;opacity:var(--hero-veil);pointer-events:none"></div>
+
+      <!-- ambient sprout watermark -->
+      <div aria-hidden="true" style="position:absolute;right:-24px;top:-10px;z-index:0;pointer-events:none;opacity:var(--sprout-watermark)">
+        <div class="sprout">
+          <svg width="132" height="132" viewBox="0 0 40 40" fill="none">
+            <ellipse cx="20" cy="34" rx="11" ry="3" fill="rgba(255,255,255,.18)"/>
+            <path d="M20 34V20" stroke="#4B5C40" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M20 24c-5-1-8-5-8-10 5 0 9 3 10 7" fill="#7C9470"/>
+            <path d="M20 20c5-1 8-5 8-10-5 0-9 4-10 8" fill="#A8C79A"/>
+          </svg>
+        </div>
+      </div>
+
+      <div style="position:relative;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="min-width:0">
+          <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#fff;line-height:1.15"><span id="greeting">Good morning</span>, <span style="color:var(--hero-name)">Alex</span></div>
+          <div id="headline" style="font-family:'Nunito',sans-serif;font-weight:600;font-size:13px;color:var(--hero-sub);margin-top:4px;max-width:220px;line-height:1.3">Let's keep the streak alive</div>
+        </div>
+        <button aria-label="View streak milestone" class="press" data-open="milestone" style="width:38px;height:38px;border-radius:50%;background:var(--trophy-bg);border:1px solid var(--trophy-border);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 5.1H4.4a1 1 0 0 0-1 1v.9a3.8 3.8 0 0 0 3.3 3.77V9.14A2.3 2.3 0 0 1 4.9 7.1v-.5h1.7V5.1Z"/><path d="M17.4 5.1h2.2a1 1 0 0 1 1 1v.9a3.8 3.8 0 0 1-3.3 3.77V9.14A2.3 2.3 0 0 0 19.1 7.1v-.5h-1.7V5.1Z"/><path d="M7 3h10v6.2a5 5 0 0 1-4 4.9v2.5h2.4a1 1 0 0 1 1 1v1.1H7.6v-1.1a1 1 0 0 1 1-1H11v-2.5a5 5 0 0 1-4-4.9V3Z"/><path d="M6.2 19.8h11.6a1 1 0 0 1 1 1v.7H5.2v-.7a1 1 0 0 1 1-1Z"/></svg>
+        </button>
+      </div>
+
+      <!-- overlapping stats card -->
+      <div style="position:relative;z-index:10;margin-top:24px;background:var(--panel-bg);border:1px solid var(--panel-edge);border-radius:26px;box-shadow:var(--panel-elevation);padding:17px;display:flex;align-items:center;gap:16px">
+        <div style="position:relative;width:92px;height:92px;flex-shrink:0">
+          <svg width="92" height="92" viewBox="0 0 92 92">
+            <defs><linearGradient id="gRingHome" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E6E533"/><stop offset="100%" stop-color="#348324"/></linearGradient></defs>
+            <circle cx="46" cy="46" r="38" fill="none" stroke="var(--panel-border)" stroke-width="8"/>
+            <circle id="homeRing" cx="46" cy="46" r="38" fill="none" stroke="url(#gRingHome)" stroke-width="8" stroke-linecap="round" transform="rotate(-90 46 46)" stroke-dasharray="238.8" stroke-dashoffset="238.8" style="transition:stroke-dashoffset .9s cubic-bezier(.22,1,.36,1)"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="display:flex;align-items:center;gap:3px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--panel-text)"><path d="M12 2c1 4-3 5.5-3 9a3 3 0 0 0 6 0c1.5 1 2 3 2 4.5A5 5 0 0 1 7 15c0-5 3-8 5-13Z"/></svg>
+              <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:var(--panel-text);line-height:1">18</div>
+            </div>
+            <div style="font-family:'Nunito',sans-serif;font-weight:600;font-size:9px;color:var(--panel-muted);margin-top:2px">day streak</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+          <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:var(--panel-text);line-height:1.2"><span id="doneCount">0</span> of <span id="totalCount">0</span> <span style="font-family:'Nunito',sans-serif;font-weight:600;font-size:13px;color:var(--panel-muted)">done today</span></div>
+          <div style="font-family:'Nunito',sans-serif;font-size:11.5px;color:var(--panel-caption)">Longest streak: 32 days</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fade-up shrink0" style="display:flex;align-items:baseline;justify-content:space-between;padding:24px 24px 0">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--text)">Today</div>
+      <button class="press" data-go="manage" style="font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--accent-on)">See all</button>
+    </div>
+
+    <div id="homeList" style="padding:14px 24px 0;display:flex;flex-direction:column;gap:12px"></div>
+
+    <!-- empty state -->
+    <div id="homeEmpty" hidden style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 40px;gap:22px">
+      <div class="pop-in" style="position:relative;width:168px;height:168px;border-radius:50%;background:linear-gradient(160deg,rgba(230,229,51,.10) 0%,rgba(52,131,36,.05) 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both,floatSlow 3.2s ease-in-out .6s infinite">
+        <svg width="168" height="60" viewBox="0 0 168 60" style="position:absolute;left:0;bottom:0">
+          <circle cx="40" cy="40" r="24" fill="var(--sprout-icon)" opacity=".18"/>
+          <path d="M0 46c22-9 44-9 64 0s46 9 60 0 28-7 44 0v14H0Z" fill="var(--sprout-icon)" opacity=".16"/>
+          <path d="M0 52c26-7 50-7 78 0s52 7 90 0v8H0Z" fill="var(--sprout-icon)" opacity=".24"/>
+        </svg>
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--sprout-icon)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative">
+          <path d="M12 14c-3.4-1-5.3 1.1-5.3 4.3 3.6.4 5.3-1.2 5.3-4.3Z"/><path d="M12 14c3.4-1 5.3 1.1 5.3 4.3-3.6.4-5.3-1.2-5.3-4.3Z"/><path d="M12 19V9.5"/>
+          <path d="M7 14.5h10l-1.3 6.6a1.3 1.3 0 0 1-1.3 1.1H9.6a1.3 1.3 0 0 1-1.3-1.1L7 14.5Z"/>
+        </svg>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--text)">No habits yet</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:14px;color:var(--text-muted);line-height:1.5;max-width:240px;margin-top:8px">Add a small ritual and watch your streak grow, one gentle day at a time.</div>
+      </div>
+      <button class="cta cta-primary" data-go="add" style="padding:14px 44px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E6E533" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add your first habit
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ INSIGHTS ══════════════ -->
+<section class="view has-tabs" id="v-insights">
+  <div class="shrink0" style="padding:32px 24px 0">
+    <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:var(--text)">Insights</div>
+    <div style="font-family:'Nunito',sans-serif;font-size:13px;color:var(--text-muted);margin-top:2px">Your habits at a glance</div>
+  </div>
+  <div class="scroll" style="padding-bottom:104px">
+    <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+      <defs><linearGradient id="gRingHabit" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E6E533"/><stop offset="100%" stop-color="#348324"/></linearGradient></defs>
+    </svg>
+
+    <div class="fade-up" style="margin:20px 24px 0;background:var(--surface);border-radius:32px;padding:22px;display:flex;align-items:center;gap:20px;box-shadow:0 2px 12px rgba(0,0,0,.04)">
+      <div style="position:relative;width:108px;height:108px;flex-shrink:0">
+        <svg width="108" height="108" viewBox="0 0 108 108">
+          <circle cx="54" cy="54" r="46" fill="none" stroke="var(--ring-track)" stroke-width="9"/>
+          <circle cx="54" cy="54" r="46" fill="none" stroke="url(#gRingHabit)" stroke-width="9" stroke-linecap="round" transform="rotate(-90 54 54)" stroke-dasharray="289" stroke-dashoffset="58"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:30px;color:var(--text);line-height:1">32</div>
+          <div style="font-family:'Nunito',sans-serif;font-weight:600;font-size:10px;color:var(--text-muted);margin-top:3px">longest streak</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:16px;color:var(--text)">Best run: 32 days</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:13px;color:var(--text-muted);line-height:1.4">Consistency over intensity — you're close.</div>
+        <div style="display:inline-flex;align-self:flex-start;align-items:center;gap:6px;background:var(--card);border-radius:999px;padding:6px 12px">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--streak-on)"></span>
+          <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;color:var(--streak-on)">18-day current streak</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fade-up" style="display:flex;align-items:baseline;justify-content:space-between;padding:28px 24px 0">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--text)">This week</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted)">4 habits/day</div>
+    </div>
+
+    <div class="fade-up" style="margin:12px 24px 0;background:var(--surface);border-radius:24px;padding:20px 18px 16px;box-shadow:0 2px 12px rgba(0,0,0,.04)">
+      <div style="position:relative">
+        <div style="position:absolute;left:0;right:0;top:14px;border-top:1px dashed var(--border)"></div>
+        <span style="position:absolute;top:4px;right:0;font-family:'Nunito',sans-serif;font-size:10px;color:var(--caption)">goal</span>
+      </div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px;height:96px;margin-top:24px" id="weekBars"></div>
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-top:10px" id="weekLabels"></div>
+    </div>
+
+    <div class="fade-up" style="padding:28px 24px 0">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--text)">By habit</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">Last 7 days</div>
+    </div>
+    <div id="byHabit" style="margin:12px 24px 0;display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+</section>
+
+<!-- ══════════════ ADD HABIT ══════════════ -->
+<section class="view has-tabs" id="v-add">
+  <div class="page-head">
+    <button class="chip-btn press" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="h1" style="flex:1 1 auto">New habit</div>
+    <button id="saveHabit" class="press" style="padding:10px 18px;border-radius:999px;background:var(--chip-bg);font-weight:800;font-size:13px;color:var(--accent-on);flex-shrink:0">Save</button>
+  </div>
+  <div class="scroll" style="padding:24px 24px 104px;display:flex;flex-direction:column;gap:22px">
+    <div>
+      <div class="label">Habit name</div>
+      <input id="habitName" type="text" class="field" placeholder="e.g. Morning meditation">
+    </div>
+    <div>
+      <div class="label">Icon</div>
+      <div id="iconPicker" style="display:flex;flex-wrap:wrap;gap:12px"></div>
+    </div>
+    <div>
+      <div class="label">Frequency</div>
+      <div style="display:flex;background:var(--card);border-radius:999px;padding:4px;gap:4px">
+        <button class="freq press" data-freq="daily" style="flex:1;text-align:center;padding:10px 0;border-radius:999px;font-weight:700;font-size:13px">Daily</button>
+        <button class="freq press" data-freq="specific" style="flex:1;text-align:center;padding:10px 0;border-radius:999px;font-weight:700;font-size:13px">Specific days</button>
+      </div>
+      <div id="dayRow" hidden style="display:flex;gap:6px;margin-top:14px"></div>
+    </div>
+    <div>
+      <div class="label">Reminder</div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:10px 16px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--icon-chip);display:flex;align-items:center;justify-content:center;color:var(--icon-on);flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        </div>
+        <div style="flex-grow:1">
+          <div style="font-family:'Nunito',sans-serif;font-size:11px;color:var(--caption)">Reminder time</div>
+          <input id="reminderTime" type="time" value="08:00" style="font-size:15px;font-weight:700;color:var(--text);background:transparent;border:none;outline:none;padding:0">
+        </div>
+        <button id="reminderToggle" role="switch" aria-checked="true" aria-label="Remind me" class="press" style="width:44px;height:26px;border-radius:999px;background:var(--cta-gradient);position:relative;flex-shrink:0">
+          <span style="position:absolute;top:3px;left:21px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .22s cubic-bezier(.34,1.56,.64,1)"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PROFILE ══════════════ -->
+<section class="view has-tabs" id="v-profile">
+  <div class="scroll" id="profileScroll" style="padding-bottom:104px">
+    <div class="fade-up" style="display:flex;flex-direction:column;align-items:center;padding:48px 24px 0;text-align:center">
+      <div class="pop-in" style="position:relative;width:100px;height:100px;border-radius:50%;background:var(--accent-on);padding:4px">
+        <div style="width:100%;height:100%;border-radius:50%;background:var(--card);overflow:hidden;display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:32px;color:var(--accent-on)">AM</span>
+        </div>
+        <div style="position:absolute;bottom:1px;right:1px;width:27px;height:27px;border-radius:50%;background:var(--accent-on);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </div>
+      </div>
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:var(--text);margin-top:14px">Alex Morgan</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:13px;color:var(--text-muted);margin-top:2px">Member since Jan 2026</div>
+    </div>
+
+    <div class="fade-up" style="display:flex;gap:10px;padding:22px 24px 0">
+      <div style="flex:1;background:var(--surface);border-radius:20px;padding:14px 10px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.05)">
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--text)" id="statTotal">0</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:11px;color:var(--text-muted);margin-top:2px">Total habits</div>
+      </div>
+      <div style="flex:1;background:var(--surface);border-radius:20px;padding:14px 10px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.05)">
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--text)">47</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:11px;color:var(--text-muted);margin-top:2px">Days active</div>
+      </div>
+      <div style="flex:1;background:var(--surface);border-radius:20px;padding:14px 10px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.05)">
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--text)">32</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:11px;color:var(--text-muted);margin-top:2px">Best streak</div>
+      </div>
+    </div>
+
+    <div class="sec-head">Settings</div>
+    <div class="card-group">
+      <button class="setting-row press" data-go="notifications">
+        <span class="icon-well"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a5 5 0 0 0-5 5V12c0 1-.4 1.9-1.1 2.6L5 15.5h14l-.9-.9A3.6 3.6 0 0 1 17 12V8.5a5 5 0 0 0-5-5Z"/><path d="M10 18a2 2 0 0 0 4 0"/></svg></span>
+        <span style="flex-grow:1;text-align:left"><span style="display:block;font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text)">Notifications</span><span style="display:block;font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">Reminders and streak alerts</span></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--nav-inactive)" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="setting-row press" data-go="theme">
+        <span class="icon-well"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg></span>
+        <span style="flex-grow:1;text-align:left"><span style="display:block;font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text)">Theme</span><span style="display:block;font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px" id="themeSummary">Light, matching sage</span></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--nav-inactive)" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="setting-row press" data-go="account">
+        <span class="icon-well"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 19.5c1.5-4 5-5.5 7.5-5.5s6 1.5 7.5 5.5"/></svg></span>
+        <span style="flex-grow:1;text-align:left"><span style="display:block;font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text)">Account</span><span style="display:block;font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">Email, password, and data</span></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--nav-inactive)" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="sec-head">Data &amp; Access</div>
+    <div class="card-group">
+      <button class="setting-row press" data-go="export">
+        <span class="icon-well"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg></span>
+        <span style="flex-grow:1;text-align:left"><span style="display:block;font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text)">Export Data</span><span style="display:block;font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">Download your habits as a file</span></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--nav-inactive)" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="setting-row press">
+        <span class="icon-well"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6.5v5c0 4.2 2.9 8.1 7 9 4.1-.9 7-4.8 7-9v-5Z"/></svg></span>
+        <span style="flex-grow:1;text-align:left"><span style="display:block;font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text)">Privacy Policy</span><span style="display:block;font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">How your data is handled</span></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--nav-inactive)" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ MANAGE HABITS ══════════════ -->
+<section class="view" id="v-manage">
+  <div class="page-head">
+    <button class="chip-btn press" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div style="flex:1 1 auto;min-width:0">
+      <div class="h1">Manage Habits</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px"><span id="manageCount">0</span> habits</div>
+    </div>
+    <button class="chip-btn press" data-open="guide" aria-label="About this screen" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px">i</button>
+  </div>
+  <div class="scroll" style="padding:20px 16px 110px;display:flex;flex-direction:column;gap:14px" id="manageList"></div>
+  <a data-go="add" class="cta" style="position:absolute;left:16px;right:16px;bottom:24px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(#253328,#253328) padding-box,var(--cta-gradient) border-box;border:1px solid transparent;border-radius:999px;box-shadow:0 8px 22px rgba(133,196,65,.10);padding:11px 24px;color:#fff;font-weight:800;font-size:14px;z-index:50">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E6E533" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    Add another habit
+  </a>
+</section>
+
+<!-- ══════════════ SUB-PAGES ══════════════ -->
+<section class="view" id="v-account">
+  <div class="page-head">
+    <button class="chip-btn press" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="h1" style="flex:1 1 auto">Account</div>
+    <button class="press" data-open="logout" style="background:var(--danger-bg);color:var(--danger-fg);border-radius:999px;padding:9px 15px;font-weight:800;font-size:12.5px;flex-shrink:0">Log Out</button>
+  </div>
+  <div class="scroll" style="padding:24px 24px 24px;display:flex;flex-direction:column;gap:12px">
+    <label style="display:flex;flex-direction:column;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px 16px">
+      <span style="font-weight:700;font-size:11px;color:var(--caption);text-transform:uppercase;letter-spacing:.03em">Full Name</span>
+      <input type="text" value="Alex Morgan" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text);background:transparent;border:none;outline:none;padding:0;width:100%">
+    </label>
+    <label style="display:flex;flex-direction:column;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px 16px">
+      <span style="font-weight:700;font-size:11px;color:var(--caption);text-transform:uppercase;letter-spacing:.03em">Email</span>
+      <input type="email" value="alex.morgan@email.com" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text);background:transparent;border:none;outline:none;padding:0;width:100%">
+    </label>
+    <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px 16px">
+      <label style="display:flex;flex-direction:column;gap:4px;flex:1 1 auto;min-width:0">
+        <span style="font-weight:700;font-size:11px;color:var(--caption);text-transform:uppercase;letter-spacing:.03em">Password</span>
+        <input type="password" value="supersecret" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:var(--text);background:transparent;border:none;outline:none;padding:0;width:100%">
+      </label>
+      <button class="press" data-go="password" style="font-weight:700;font-size:13px;color:var(--accent-on);flex-shrink:0">Change</button>
+    </div>
+    <div style="display:flex;justify-content:center;padding-top:22px">
+      <button class="press" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:var(--danger-faint)">Delete Account</button>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-password">
+  <div class="page-head">
+    <button class="chip-btn press" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div><div class="h1">Change password</div><div class="sub">Keep your account safe.</div></div>
+  </div>
+  <div class="scroll" style="padding:28px 24px 12px;display:flex;flex-direction:column;gap:22px">
+    <div style="background:var(--card);border-radius:20px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-on)" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+      <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5">Use at least 8 characters, with a number and a symbol, for a stronger password.</div>
+    </div>
+    <div><div class="label">Current password</div><input type="password" class="field" placeholder="Enter current password"></div>
+    <div>
+      <div class="label">New password</div>
+      <input type="password" class="field" placeholder="Enter new password">
+      <div style="height:4px;border-radius:2px;background:var(--border);margin-top:10px;overflow:hidden">
+        <div style="height:100%;width:65%;border-radius:2px;background:linear-gradient(to right,#E6E533 0%,#348324 100%)"></div>
+      </div>
+      <div style="font-weight:700;font-size:11.5px;color:var(--accent-on);margin-top:6px">Good strength</div>
+    </div>
+    <div><div class="label">Confirm new password</div><input type="password" class="field" placeholder="Re-enter new password"></div>
+  </div>
+  <div class="footer-bar">
+    <button class="btn-ghost press" data-back>Cancel</button>
+    <button class="cta cta-primary" data-back style="flex:1.4;padding:15px">Update password</button>
+  </div>
+</section>
+
+<section class="view" id="v-notifications">
+  <div class="page-head">
+    <button class="chip-btn press" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div><div class="h1">Notifications</div><div class="sub">What reaches you, and when.</div></div>
+  </div>
+  <div class="scroll" style="padding:24px 24px"><div class="card-group" style="margin:0" id="notifList"></div></div>
+</section>
+
+<section class="view" id="v-theme">
+  <div class="page-head">
+    <button class="chip-btn press" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div><div class="h1">Theme</div><div class="sub">Choose how it feels.</div></div>
+  </div>
+  <div class="scroll" style="padding:24px 24px;display:flex;flex-direction:column;gap:12px" id="themeOptions"></div>
+</section>
+
+<section class="view" id="v-export">
+  <div class="page-head">
+    <button class="chip-btn press" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div><div class="h1">Export my data</div><div class="sub">Yours to keep.</div></div>
+  </div>
+  <div class="scroll" style="padding:24px 24px;display:flex;flex-direction:column;gap:14px">
+    <div style="background:var(--card);border-radius:20px;padding:16px 18px;font-size:12.5px;color:var(--text-muted);line-height:1.5">Your habits and completion history, as a JSON file you can open anywhere.</div>
+    <button id="doExport" class="cta cta-primary" style="padding:15px">Download JSON</button>
+    <div id="exportNote" style="font-size:12px;color:var(--caption);text-align:center"></div>
+  </div>
+</section>
+<!-- ══════════════ TAB BAR (one instance, shared by every tabbed view) ══════════════ -->
+<nav class="tabbar" id="tabbar" aria-label="Main">
+  <button class="tab" data-tab="home"><span class="tab-inner">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path class="fill-when-active" d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6h-4v6H5a1 1 0 0 1-1-1V11.5Z" fill="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>
+    <span>Home</span></span></button>
+  <button class="tab" data-tab="insights"><span class="tab-inner">
+    <svg width="22" height="22" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="12" width="3.2" height="7" rx="1"/><rect x="10.4" y="7.5" width="3.2" height="11.5" rx="1"/><rect x="15.8" y="4.5" width="3.2" height="14.5" rx="1"/></svg>
+    <span>Insights</span></span></button>
+  <button class="tab" data-tab="add"><span class="tab-inner">
+    <svg width="22" height="22" viewBox="0 0 24 24" stroke-width="1.5" stroke-linejoin="round"><path fill-rule="evenodd" d="M12 3A9 9 0 0 1 12 21A9 9 0 0 1 12 3Z M10.4 7L13.6 7L13.6 10.4L17 10.4L17 13.6L13.6 13.6L13.6 17L10.4 17L10.4 13.6L7 13.6L7 10.4L10.4 10.4Z"/></svg>
+    <span>Add</span></span></button>
+  <button class="tab" data-tab="profile"><span class="tab-inner">
+    <svg width="22" height="22" viewBox="0 0 24 24" stroke-width="1.5" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 19.5C6 15.5 9.5 14 12 14C14.5 14 18 15.5 19.5 19.5L19.5 21L4.5 21Z"/></svg>
+    <span>Profile</span></span></button>
+</nav>
+
+<!-- ══════════════ OVERLAYS ══════════════ -->
+<div class="overlay" id="o-milestone" hidden>
+  <button class="scrim scrim-in" data-close aria-label="Close"></button>
+  <div class="dialog pop-in" role="dialog" aria-modal="true" aria-label="Streak milestone">
+    <div style="width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--streak-on)">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v6.2a5 5 0 0 1-4 4.9v2.5h2.4a1 1 0 0 1 1 1v1.1H7.6v-1.1a1 1 0 0 1 1-1H11v-2.5a5 5 0 0 1-4-4.9V3Z"/><path d="M6.2 19.8h11.6a1 1 0 0 1 1 1v.7H5.2v-.7a1 1 0 0 1 1-1Z"/></svg>
+    </div>
+    <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:var(--text)">30-day streak!</div>
+    <div style="font-size:13.5px;line-height:1.5;color:var(--text-muted);margin-top:8px">A full month of showing up. That's how habits become second nature.</div>
+    <button class="cta cta-primary" data-close style="width:100%;margin-top:22px;padding:14px 24px">Keep going</button>
+  </div>
+</div>
+
+<div class="overlay" id="o-logout" hidden>
+  <button class="scrim scrim-in blur" data-close aria-label="Cancel"></button>
+  <div class="dialog pop-in" role="dialog" aria-modal="true" aria-label="Log out">
+    <div style="width:52px;height:52px;margin:0 auto 14px;border-radius:50%;background:var(--danger-bg);color:var(--danger-fg);display:flex;align-items:center;justify-content:center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h11M17 8.5 20.5 12 17 15.5"/></svg>
+    </div>
+    <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--text)">Log Out?</div>
+    <div style="font-size:13.5px;line-height:1.5;color:var(--text-muted);margin-top:8px">Are you sure you want to end your current session?</div>
+    <div style="display:flex;gap:10px;margin-top:22px">
+      <button class="press" data-close style="flex:1;background:var(--card);color:var(--text);border-radius:999px;padding:13px 8px;font-weight:700;font-size:14px">Cancel</button>
+      <button class="press" id="confirmLogout" style="flex:1;background:var(--danger-fg);color:#fff;border-radius:999px;padding:13px 8px;font-weight:800;font-size:14px">Log Out</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="o-guide" hidden style="align-items:flex-start">
+  <button class="scrim scrim-in" data-close aria-label="Close"></button>
+  <div class="sheet-in" style="position:relative;margin:88px 20px 0;background:var(--sheet-surface);border:1px solid transparent;border-radius:22px;padding:22px 20px;box-shadow:0 18px 40px rgba(0,0,0,.25);width:100%">
+    <button class="press" data-close aria-label="Close" style="position:absolute;top:14px;right:14px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:var(--sheet-close)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:var(--text);text-align:center">Status guide</div>
+    <div style="font-size:12.5px;color:var(--sheet-muted);font-style:italic;text-align:center;line-height:1.4;margin-top:6px;padding:0 14px">Tap a habit to toggle today. Use the menu for more.</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:18px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:var(--nav-inactive)"></span><span style="font-weight:600;font-size:12.5px;color:var(--text)">Not started</span></span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:var(--warn-fg)"></span><span style="font-weight:600;font-size:12.5px;color:var(--text)">Pending</span></span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:var(--accent-on)"></span><span style="font-weight:600;font-size:12.5px;color:var(--text)">Completed</span></span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /.phone -->
+
+<script>
+"use strict";
+/* ============================================================
+   State — habits and theme, both persisted to localStorage.
+   Wrapped because storage throws in some privacy modes.
+   ============================================================ */
+const HABITS_KEY="habitTrackerHabits", THEME_KEY="habitTrackerTheme";
+const store={
+  get(k,f){try{const v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch(e){return f}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+
+const ICONS={
+  target:'<circle cx="12" cy="12" r="2.4"/><circle cx="12" cy="12" r="6.4" opacity=".55"/><circle cx="12" cy="12" r="10.4" opacity=".3"/>',
+  drop:'<path d="M12 3.5c3.2 3.6 5.5 6.3 5.5 9.1a5.5 5.5 0 0 1-11 0c0-2.8 2.3-5.5 5.5-9.1Z"/>',
+  book:'<path d="M4 5.5h6a2 2 0 0 1 2 2V19a2 2 0 0 0-2-2H4Z"/><path d="M20 5.5h-6a2 2 0 0 0-2 2V19a2 2 0 0 1 2-2h6Z"/>',
+  walk:'<circle cx="13" cy="4.5" r="1.8"/><path d="M11 21l2-5-2.5-2.5L9 9l4-1 3 3"/><path d="M8 21l2.5-4"/>',
+  leaf:'<path d="M6 20c-1-6 1-11 11-13 1.5 8-3 12-11 13Z"/><path d="M7 19c2-3 4.5-6 9-11"/>',
+  moon:'<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>',
+  headphones:'<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.6"/><rect x="17" y="14" width="4" height="6" rx="1.6"/>'
+};
+const HUES=["med","water","read","walk"];
+const DEFAULT_HABITS=[
+  {id:1,name:"Morning meditation",meta:"10 min",icon:"target",hue:"med",done:true,days:6},
+  {id:2,name:"Drink water",meta:"8 glasses",icon:"drop",hue:"water",done:true,days:4},
+  {id:3,name:"Read 10 pages",meta:"Anytime",icon:"book",hue:"read",done:false,days:5},
+  {id:4,name:"Evening walk",meta:"20 min",icon:"walk",hue:"walk",done:false,days:3}
+];
+let habits=store.get(HABITS_KEY,null)||DEFAULT_HABITS.slice();
+const saveHabits=()=>store.set(HABITS_KEY,habits);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const svg=(paths,color,size)=>'<svg width="'+(size||19)+'" height="'+(size||19)+'" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+paths+'</svg>';
+
+/* ============================================================
+   Router — JS state decides which <section> is displayed.
+   No separate HTML files; no <a href="page.html"> anywhere.
+   ============================================================ */
+const TABS=["home","insights","add","profile"];
+const stack=[];
+let current=null;
+
+function show(view,push){
+  if(view===current)return;
+  if(push!==false&&current)stack.push(current);
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("is-active",s.id==="v-"+view));
+  const tabbed=TABS.indexOf(view)>-1;
+  document.getElementById("tabbar").hidden=!tabbed;
+  document.querySelectorAll(".tab").forEach(t=>{
+    if(t.dataset.tab===view)t.setAttribute("aria-current","page");
+    else t.removeAttribute("aria-current");
+  });
+  current=view;
+  render();
+  const sc=document.querySelector("#v-"+view+" .scroll");
+  if(sc)sc.scrollTop=0;            // open at the top, never mid-page
+  try{history.replaceState(null,"","#"+view)}catch(e){}
+}
+function goBack(){
+  const prev=stack.pop();
+  if(prev){current=null;show(prev,false)}else{current=null;show("home",false)}
+}
+
+/* ============================================================
+   Rendering
+   ============================================================ */
+function renderHome(){
+  const list=document.getElementById("homeList"),empty=document.getElementById("homeEmpty");
+  const done=habits.filter(h=>h.done).length;
+  document.getElementById("doneCount").textContent=done;
+  document.getElementById("totalCount").textContent=habits.length;
+  const C=2*Math.PI*38;
+  document.getElementById("homeRing").style.strokeDashoffset=String(habits.length?C*(1-done/habits.length):C);
+  const hr=new Date().getHours();
+  document.getElementById("greeting").textContent=hr<12?"Good morning":hr<18?"Good afternoon":"Good evening";
+  document.getElementById("headline").textContent=
+    !habits.length?"Every streak starts with day one":
+    done===0?"Let's start today off right":
+    done===habits.length?"You crushed today!":"Let's keep the streak alive";
+
+  empty.hidden=habits.length>0;
+  list.hidden=habits.length===0;
+  list.innerHTML=habits.map(hb=>
+    '<button class="press" data-toggle="'+hb.id+'" style="width:100%;display:flex;align-items:center;gap:14px;background:var(--row-surface);border-radius:22px;padding:14px 16px;box-shadow:inset 0 0 0 1px var(--row-edge),0 2px 12px rgba(0,0,0,.04);text-align:left">'+
+      '<span style="width:40px;height:40px;border-radius:50%;background:var(--hue-'+hb.hue+'-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+svg(ICONS[hb.icon],"var(--hue-"+hb.hue+")")+'</span>'+
+      '<span style="flex-grow:1;min-width:0">'+
+        '<span style="display:block;font-family:\'Quicksand\',sans-serif;font-weight:600;font-size:15px;color:var(--text);'+(hb.done?"opacity:.55;text-decoration:line-through":"")+'">'+esc(hb.name)+'</span>'+
+        '<span style="display:block;font-family:\'Nunito\',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">'+esc(hb.meta)+'</span>'+
+      '</span>'+
+      '<span style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:'+(hb.done?"var(--cta-gradient)":"transparent")+';border:'+(hb.done?"none":"2px solid var(--border)")+'">'+
+        (hb.done?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#112219" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" style="animation:checkPop .3s cubic-bezier(.34,1.56,.64,1)"><path d="M4 12l5 5L20 6"/></svg>':"")+
+      '</span></button>').join("");
+}
+
+function renderInsights(){
+  const vals=[4,3,4,1,0,0,0],labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],today=3,max=4,H=96;
+  document.getElementById("weekBars").innerHTML=vals.map((v,i)=>{
+    const filled=i<=today;
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px">'+
+      '<div style="font-family:\'Nunito\',sans-serif;font-weight:'+(i===today?800:700)+';font-size:11px;color:'+(filled?(i===today?"var(--text)":"var(--text-muted)"):"transparent")+'">'+v+'</div>'+
+      (filled
+        /* gradient anchored to the PLOT height, not the bar: a given height is
+           always the same colour, so colour reinforces magnitude. */
+        ?'<div style="width:20px;height:'+Math.round(v/max*H)+'px;border-radius:6px 6px 2px 2px;background:var(--bar-sage);background-size:100% '+H+'px;background-position:bottom;background-repeat:no-repeat"></div>'
+        :'<div style="width:20px;height:10px;border-radius:5px;background:var(--empty-bar)"></div>')+
+    '</div>';}).join("");
+  document.getElementById("weekLabels").innerHTML=labels.map((l,i)=>
+    '<div style="flex:1;text-align:center;font-family:\'Nunito\',sans-serif;font-size:11px;font-weight:'+(i===today?800:400)+';color:'+(i===today?"var(--text)":"var(--text-muted)")+'">'+l+'</div>').join("");
+
+  const C=2*Math.PI*17;
+  document.getElementById("byHabit").innerHTML=habits.map(hb=>{
+    const pct=Math.round((hb.days||0)/7*100);
+    return '<div style="display:flex;align-items:center;gap:14px;background:var(--row-surface);border-radius:24px;padding:14px 16px;box-shadow:inset 0 0 0 1px var(--row-edge),0 2px 12px rgba(0,0,0,.04)">'+
+      '<span style="width:38px;height:38px;border-radius:50%;background:var(--hue-'+hb.hue+'-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+svg(ICONS[hb.icon],"var(--hue-"+hb.hue+")")+'</span>'+
+      '<span style="flex-grow:1;min-width:0">'+
+        '<span style="display:block;font-family:\'Quicksand\',sans-serif;font-weight:600;font-size:15px;color:var(--text)">'+esc(hb.name)+'</span>'+
+        '<span style="display:block;font-family:\'Nunito\',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">'+(hb.days||0)+' of 7 days</span>'+
+      '</span>'+
+      '<span style="position:relative;width:44px;height:44px;flex-shrink:0">'+
+        '<svg width="44" height="44" viewBox="0 0 44 44">'+
+          '<circle cx="22" cy="22" r="17" fill="none" stroke="var(--ring-rest)" stroke-width="5"/>'+
+          '<circle cx="22" cy="22" r="17" fill="none" stroke="var(--ring-on)" stroke-width="5" stroke-linecap="round" transform="rotate(-90 22 22)" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pct/100)).toFixed(1)+'"/>'+
+        '</svg>'+
+        '<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--text)">'+pct+'%</span>'+
+      '</span></div>';}).join("");
+}
+
+function renderManage(){
+  document.getElementById("manageCount").textContent=habits.length;
+  document.getElementById("manageList").innerHTML=habits.map(hb=>{
+    const label=hb.done?"Completed":"Not started",col=hb.done?"var(--accent-on)":"var(--text-muted)";
+    return '<div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:16px;flex-shrink:0;position:relative;overflow:hidden">'+
+      '<span style="position:absolute;left:0;top:0;bottom:0;width:5px;background:'+(hb.done?"var(--cta-gradient)":"var(--border)")+'"></span>'+
+      '<span style="width:40px;height:40px;border-radius:50%;background:var(--hue-'+hb.hue+'-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">'+svg(ICONS[hb.icon],"var(--hue-"+hb.hue+")")+'</span>'+
+      '<span style="flex-grow:1;min-width:0">'+
+        '<span style="display:block;font-family:\'Quicksand\',sans-serif;font-weight:600;font-size:15px;color:var(--text)">'+esc(hb.name)+'</span>'+
+        '<span style="display:block;font-family:\'Nunito\',sans-serif;font-size:12px;color:var(--text-muted);margin-top:2px">'+esc(hb.meta)+'</span>'+
+        '<span style="display:block;font-family:\'Nunito\',sans-serif;font-weight:700;font-size:12px;color:'+col+';margin-top:4px">'+label+'</span>'+
+      '</span>'+
+      '<button class="press" data-remove="'+hb.id+'" aria-label="Remove '+esc(hb.name)+'" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--nav-inactive);flex-shrink:0">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7"/></svg>'+
+      '</button></div>';}).join("");
+}
+
+function render(){
+  if(current==="home")renderHome();
+  else if(current==="insights")renderInsights();
+  else if(current==="manage")renderManage();
+  else if(current==="profile")document.getElementById("statTotal").textContent=habits.length;
+}
+
+/* ============================================================
+   Theme
+   ============================================================ */
+function setTheme(t){
+  document.documentElement.setAttribute("data-theme",t);
+  store.set(THEME_KEY,t);
+  const s=document.getElementById("themeSummary");
+  if(s)s.textContent=(t==="dark"?"Dark":"Light")+", matching sage";
+  document.querySelectorAll("[data-theme-opt]").forEach(b=>{
+    const on=b.dataset.themeOpt===t;
+    b.style.borderColor=on?"var(--accent-on)":"var(--border)";
+    const c=b.querySelector("[data-check]"); if(c)c.style.opacity=on?"1":"0";
+  });
+}
+
+/* ============================================================
+   Add-habit form
+   ============================================================ */
+let form={icon:"target",freq:"daily",days:{},reminder:true};
+document.getElementById("iconPicker").innerHTML=Object.keys(ICONS).map(k=>
+  '<button class="press" data-icon="'+k+'" aria-label="'+k+'" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center"></button>').join("");
+function paintIcons(){
+  document.querySelectorAll("[data-icon]").forEach((b,i)=>{
+    const k=b.dataset.icon,on=form.icon===k;
+    b.style.background=on?"var(--cta-gradient)":"var(--card)";
+    b.innerHTML=svg(ICONS[k],on?"#112219":"var(--hue-"+HUES[i%4]+")",22);
+  });
+}
+document.getElementById("dayRow").innerHTML=["M","T","W","T","F","S","S"].map((d,i)=>
+  '<button class="press" data-day="'+i+'" style="flex:1;padding:10px 0;border-radius:12px;border:1.5px solid var(--border);font-weight:700;font-size:12px;color:var(--text-muted);background:transparent">'+d+'</button>').join("");
+function paintFreq(){
+  document.querySelectorAll(".freq").forEach(b=>{
+    const on=b.dataset.freq===form.freq;
+    b.style.background=on?"var(--seg-active-bg)":"transparent";
+    b.style.color=on?"var(--seg-active-fg)":"var(--text-muted)";
+    b.style.boxShadow=on?"inset 0 0 0 1px var(--seg-active-ring)":"none";
+  });
+  document.getElementById("dayRow").hidden=form.freq!=="specific";
+}
+paintIcons(); paintFreq();
+
+/* ============================================================
+   Notifications + Theme lists
+   ============================================================ */
+document.getElementById("notifList").innerHTML=[
+  ["Daily reminders","A nudge at your chosen time",'<path d="M12 3.5a5 5 0 0 0-5 5V12c0 1-.4 1.9-1.1 2.6L5 15.5h14l-.9-.9A3.6 3.6 0 0 1 17 12V8.5a5 5 0 0 0-5-5Z"/><path d="M10 18a2 2 0 0 0 4 0"/>',true],
+  ["Streak at risk","Only when a streak is about to break",'<path d="M12 4l9 16H3Z"/><path d="M12 10v4M12 17v.01"/>',true],
+  ["Weekly summary","Your week, every Sunday",'<rect x="5" y="12" width="3" height="7" rx="1"/><rect x="10.5" y="7" width="3" height="12" rx="1"/><rect x="16" y="4" width="3" height="15" rx="1"/>',false],
+  ["Milestones","When you hit a big number",'<path d="M12 3l2.4 5 5.6.8-4 3.9 1 5.5-5-2.6-5 2.6 1-5.5-4-3.9 5.6-.8Z"/>',true]
+].map((r,i)=>
+  '<div class="setting-row" style="cursor:default">'+
+    '<span class="icon-well">'+svg(r[2],"var(--icon-on)")+'</span>'+
+    '<span style="flex-grow:1;text-align:left"><span style="display:block;font-family:\'Quicksand\',sans-serif;font-weight:600;font-size:15px;color:var(--text)">'+r[0]+'</span>'+
+    '<span style="display:block;font-size:12px;color:var(--text-muted);margin-top:2px">'+r[1]+'</span></span>'+
+    '<button role="switch" aria-checked="'+r[3]+'" aria-label="'+r[0]+'" data-switch class="press" style="width:44px;height:26px;border-radius:999px;background:'+(r[3]?"var(--cta-gradient)":"var(--border)")+';position:relative;flex-shrink:0">'+
+      '<span style="position:absolute;top:3px;left:'+(r[3]?21:3)+'px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .22s cubic-bezier(.34,1.56,.64,1)"></span>'+
+    '</button></div>').join("");
+
+document.getElementById("themeOptions").innerHTML=[["light","Light","Cream and sage"],["dark","Dark","Deep forest"]].map(o=>
+  '<button class="press" data-theme-opt="'+o[0]+'" style="display:flex;align-items:center;gap:14px;background:var(--surface);border:2px solid var(--border);border-radius:20px;padding:16px;text-align:left">'+
+    '<span style="width:44px;height:44px;border-radius:14px;flex-shrink:0;background:'+(o[0]==="light"?"linear-gradient(135deg,#FBF7EF,#EEF2E9)":"linear-gradient(135deg,#1E2019,#334538)")+';border:1px solid var(--border)"></span>'+
+    '<span style="flex-grow:1"><span style="display:block;font-family:\'Quicksand\',sans-serif;font-weight:600;font-size:15px;color:var(--text)">'+o[1]+'</span>'+
+    '<span style="display:block;font-size:12px;color:var(--text-muted);margin-top:2px">'+o[2]+'</span></span>'+
+    '<span data-check style="opacity:0;transition:opacity .2s ease;color:var(--accent-on)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>'+
+  '</button>').join("");
+
+/* ============================================================
+   One delegated click handler for the whole app
+   ============================================================ */
+document.addEventListener("click",e=>{
+  const go=e.target.closest("[data-go]");        if(go){show(go.dataset.go);return}
+  const back=e.target.closest("[data-back]");    if(back){goBack();return}
+  const tab=e.target.closest(".tab");            if(tab){show(tab.dataset.tab);return}
+  const open=e.target.closest("[data-open]");    if(open){document.getElementById("o-"+open.dataset.open).hidden=false;return}
+  const close=e.target.closest("[data-close]");  if(close){close.closest(".overlay").hidden=true;return}
+
+  const tg=e.target.closest("[data-toggle]");
+  if(tg){const h=habits.filter(x=>x.id===+tg.dataset.toggle)[0];if(h){h.done=!h.done;saveHabits();renderHome()}return}
+  const rm=e.target.closest("[data-remove]");
+  if(rm){habits=habits.filter(x=>x.id!==+rm.dataset.remove);saveHabits();renderManage();return}
+
+  const ic=e.target.closest("[data-icon]");      if(ic){form.icon=ic.dataset.icon;paintIcons();return}
+  const fq=e.target.closest(".freq");            if(fq){form.freq=fq.dataset.freq;paintFreq();return}
+  const dy=e.target.closest("[data-day]");
+  if(dy){const n=dy.dataset.day,on=!!form.days[n];form.days[n]=!on;
+         dy.style.background=on?"transparent":"var(--cta-gradient)";
+         dy.style.color=on?"var(--text-muted)":"#112219";
+         dy.style.borderColor=on?"var(--border)":"transparent";return}
+
+  const sw=e.target.closest("[data-switch]");
+  if(sw){const on=sw.getAttribute("aria-checked")!=="true";sw.setAttribute("aria-checked",String(on));
+         sw.style.background=on?"var(--cta-gradient)":"var(--border)";
+         sw.firstElementChild.style.left=(on?21:3)+"px";return}
+
+  const th=e.target.closest("[data-theme-opt]"); if(th){setTheme(th.dataset.themeOpt);return}
+});
+
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  const all=document.querySelectorAll(".overlay");
+  for(let i=0;i<all.length;i++)if(!all[i].hidden){all[i].hidden=true;return}
+});
+
+document.getElementById("reminderToggle").addEventListener("click",function(){
+  form.reminder=!form.reminder;
+  this.setAttribute("aria-checked",String(form.reminder));
+  this.style.background=form.reminder?"var(--cta-gradient)":"var(--border)";
+  this.firstElementChild.style.left=form.reminder?"21px":"3px";
+});
+
+document.getElementById("saveHabit").addEventListener("click",()=>{
+  const el=document.getElementById("habitName"),name=el.value.trim();
+  if(!name){el.focus();el.style.borderColor="var(--danger-fg)";setTimeout(()=>{el.style.borderColor=""},1200);return}
+  const time=document.getElementById("reminderTime").value;
+  const when=form.freq==="daily"?"Daily":"Selected days";
+  habits.push({id:Date.now(),name:name,icon:form.icon,hue:HUES[habits.length%4],done:false,days:0,
+               meta:form.reminder&&time?when+" • "+time:when});
+  saveHabits();
+  el.value=""; form={icon:"target",freq:"daily",days:{},reminder:true};
+  paintIcons(); paintFreq();
+  show("home");
+});
+
+document.getElementById("confirmLogout").addEventListener("click",()=>{
+  document.getElementById("o-logout").hidden=true;
+  stack.length=0; current=null; show("welcome",false);
+});
+
+document.getElementById("doExport").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify({exported:new Date().toISOString(),habits:habits},null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="habits.json"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  document.getElementById("exportNote").textContent="Saved habits.json";
+});
+
+/* ============================================================
+   Boot
+   ============================================================ */
+setTheme(store.get(THEME_KEY,"light"));
+const start=(location.hash||"").replace("#","");
+show(document.getElementById("v-"+start)?start:"welcome",false);
+</script>
+</body>
+</html>

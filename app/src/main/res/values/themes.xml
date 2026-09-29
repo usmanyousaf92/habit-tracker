@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Framework Material theme, no AppCompat: the whole UI is the WebView, so
+     there is nothing for a support library to style. -->
+<resources>
+
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/brand_bg</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Bar backgrounds are painted by the root view, so the bars stay in
+             sync with the in-app theme toggle even on API 35 where
+             setStatusBarColor() no longer does anything. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- Shown for the handful of frames before the WebView paints. -->
+    <style name="AppTheme.Launch" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+
+</resources>

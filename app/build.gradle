@@ -1,0 +1,73 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Release signing is driven entirely by environment variables so that the
+// same build file works locally (unsigned) and in CI (signed, from secrets).
+def keystorePath = System.getenv("KEYSTORE_FILE")
+def hasKeystore = keystorePath != null && !keystorePath.trim().isEmpty() && file(keystorePath).exists()
+
+android {
+    namespace 'app.habittracker'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "app.habittracker"
+        minSdk 24
+        targetSdk 35
+        // CI passes -PversionCode=<run number> so every build is installable
+        // over the last one. Falls back to 1 for local builds.
+        versionCode ((project.findProperty("versionCode") ?: "1") as String) as Integer
+        versionName (project.findProperty("versionName") ?: "1.0") as String
+    }
+
+    signingConfigs {
+        if (hasKeystore) {
+            release {
+                storeFile file(keystorePath)
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            // Debug builds are signed with the auto-generated debug key, which is
+            // all you need for sideloading onto your own device.
+            minifyEnabled false
+        }
+        release {
+            // Kept off deliberately: the app is a single HTML asset plus ~200 lines
+            // of Java, so shrinking buys nothing and only adds a way to break.
+            minifyEnabled false
+            if (hasKeystore) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/*.kotlin_module']
+        }
+    }
+
+    lint {
+        // Don't let a style warning fail a CI build.
+        abortOnError false
+    }
+}
+
+dependencies {
+    // The only dependency. WebViewAssetLoader serves the bundled HTML over a
+    // real https:// origin instead of file://, which is what makes localStorage
+    // (habits + theme persistence) reliable across every WebView version.
+    implementation 'androidx.webkit:webkit:1.12.1'
+}

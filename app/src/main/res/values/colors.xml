@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors the CSS custom properties in index.html. Light values live here;
+     values-night/colors.xml carries the dark overrides. Token names are given
+     without their leading dashes because XML comments cannot contain them. -->
+<resources>
+    <color name="brand_bg">#FBF7EF</color>          <!-- token: bg -->
+    <color name="brand_forest">#112219</color>      <!-- token: on-bright, welcome bg -->
+    <color name="brand_lime">#E6E533</color>        <!-- cta-gradient start -->
+    <color name="brand_green">#348324</color>       <!-- cta-gradient end -->
+    <color name="icon_bg_start">#16301F</color>     <!-- hero-gradient start -->
+    <color name="icon_bg_end">#2F6B3E</color>       <!-- hero-gradient end -->
+</resources>

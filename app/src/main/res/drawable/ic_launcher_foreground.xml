@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The sprout mark, lifted from the Home banner watermark in index.html.
+     The artwork is authored in the app's own 40x40 space; the 60-unit viewport
+     plus the +10 translate centres it inside the adaptive icon's 66% safe zone,
+     so no scale/rotate transform order can bite us. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="60"
+    android:viewportHeight="60">
+
+    <group
+        android:translateX="10"
+        android:translateY="10">
+
+        <!-- ground shadow -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillAlpha="0.18"
+            android:pathData="M9,34 a11,3 0 1,0 22,0 a11,3 0 1,0 -22,0 Z" />
+
+        <!-- stem -->
+        <path
+            android:pathData="M20,34 L20,19"
+            android:strokeColor="#4B5C40"
+            android:strokeWidth="2.4"
+            android:strokeLineCap="round" />
+
+        <!-- lower-left leaf -->
+        <path
+            android:fillColor="#7C9470"
+            android:pathData="M20,24 c-5,-1 -8,-5 -8,-10 5,0 9,3 10,7 Z" />
+
+        <!-- upper-right leaf -->
+        <path
+            android:fillColor="#A8C79A"
+            android:pathData="M20,20 c5,-1 8,-5 8,-10 -5,0 -9,4 -10,8 Z" />
+
+    </group>
+</vector>
